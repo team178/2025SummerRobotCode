@@ -6,15 +6,25 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class RobotContainer {
-  public RobotContainer() {
-    configureBindings();
-  }
+    // swerve subsystem
+    private SwerveDrive swerve;
+    
+    public RobotContainer() {
+        swerve = new SwerveDrive();
 
-  private void configureBindings() {}
+        configureBindings();
+    }
 
-  public Command getAutonomousCommand() {
-    return Commands.print("No autonomous command configured");
-  }
+    private void configureBindings() {
+        swerve.setDefaultCommand(swerve.runControllerInputs(
+            
+        ));
+    }
+
+    public Command getAutonomousCommand() {
+        return Commands.print("No autonomous command configured");
+    }
 }
