@@ -8,12 +8,15 @@ public interface SwerveModuleIO {
     @AutoLog
     public static class SwerveModuleIOInputs {
         public Rotation2d turnPosition = new Rotation2d();
-        
+        public double speedMetersPerSecond = 0;
     }
 
     // update the inputs
     public void updateInputs(SwerveModuleIOInputs inputs);
 
     // set turn position
-    public void setTurnPosition(Rotation2d rot);
+    public void setTurnPosition(Rotation2d angle);
+
+    // set drive velocity
+    public void setDriveVelocity(double speedMetersPerSecond);
 }

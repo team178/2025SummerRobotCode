@@ -1,6 +1,8 @@
 package frc.robot.subsystems.swerve;
 
 
+import com.revrobotics.AbsoluteEncoder;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -10,7 +12,7 @@ import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 
-import frc.robot.Constants.SwerveModuleConstants;
+import frc.robot.Constants.SwerveConstants;
 
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
@@ -18,19 +20,25 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
     private SparkMax turnMotor;
     private SparkMax driveMotor;
 
+    private RelativeEncoder turnEncoder;
+    private AbsoluteEncoder driveEncoder;
+
     public SwerveModuleIOSpark(int index) {
-        turnMotor = new SparkMax(SwerveModuleConstants.turnCANIds[index], MotorType.kBrushless);
-        driveMotor = new SparkMax(SwerveModuleConstants.driveCANIds[index], MotorType.kBrushless);
+        turnMotor = new SparkMax(SwerveConstants.turnCANIds[index], MotorType.kBrushless);
+        driveMotor = new SparkMax(SwerveConstants.driveCANIds[index], MotorType.kBrushless);
 
-        turnMotor.configure(SwerveModuleConstants.turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        turnEncoder = turnMotor.getEncoder();
+        driveEncoder = driveMotor.getAbsoluteEncoder();
+
+        turnMotor.configure(SwerveConstants.turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
-    public void setTurnPosition(Rotation2d rot) {
-        turnMotor.getClosedLoopController().setReference(rot.getRadians(), ControlType.kPosition);
+    public void setTurnPosition(Rotation2d angle) {
+        turnMotor.getClosedLoopController().setReference(angle.getRotations(), ControlType.kPosition);
     }
 
-    public void setDriveVelocity(double vel) {
-        driveMotor.getClosedLoopController().setReference(vel, ControlType.kVelocity);
+    public void setDriveVelocity(double speedMetersPerSecond) {
+        driveMotor.getClosedLoopController().setReference(speedMetersPerSecond, ControlType.kVelocity);
     }
 
     // public SwerveModuleState optimizeState(SwerveModuleState defaultState) {
@@ -43,6 +51,7 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
 
    @Override
     public void updateInputs(SwerveModuleIOInputs inputs) {
-        // inputs.turnPosition = 
+        inputs.turnPosition = Rotation2d.fromRotations(turnEncoder.getPosition());
+        inputs.speedMetersPerSecond = driveEncoder.getVelocity();
     }
 }
