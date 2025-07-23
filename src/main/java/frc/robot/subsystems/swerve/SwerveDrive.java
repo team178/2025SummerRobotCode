@@ -39,19 +39,20 @@ public class SwerveDrive extends SubsystemBase {
     ) {
         return run(() -> {
             double x =  xSupplier.getAsDouble();
-            double y = ySupplier.getAsDouble();
-            double omega = ySupplier.getAsDouble();
+            double y =  -ySupplier.getAsDouble();//
+            double omega = omegaSupplier.getAsDouble();//
             omega *= -1; // rotation is reversed due to coordinate plane
-            
+
             double vx = y;
             double vy = -x;
             
             double deadband = 0.2;
 
+            omega = adjustAxisInput(omega, deadband);
+
             double magnitude = adjustAxisInput(Math.hypot(vx, vy), deadband) * SwerveConstants.maxVelocityMetersPerSec;
             double angle = Math.atan2(vy, vx);
-            
-            applyDriveInputs(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude, omega, true);
+            applyDriveInputs(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude, omega, false);//
         });
     }
 
@@ -61,11 +62,22 @@ public class SwerveDrive extends SubsystemBase {
         : 0; // leave linear, adjust for deadband
     }
 
-    public void applyDriveInputs(double vx, double vy, double omega, boolean fieldRelative) {
+    public void applyDriveInputs(double vx, double vy, double omega, boolean robotCentric) {//
+        boolean toX = true;
+
         ChassisSpeeds speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawHeading());
-        if (fieldRelative) speeds = new ChassisSpeeds(vx, vy, omega);
+        if (robotCentric) speeds = new ChassisSpeeds(vx, vy, omega);//
         
         SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+
+        if(toX && vx == 0 && vy == 0 && omega == 0) {
+            states = new SwerveModuleState[]{
+                new SwerveModuleState(0, new Rotation2d(Math.PI / 4)),
+                new SwerveModuleState(0, new Rotation2d(-Math.PI / 4)),
+                new SwerveModuleState(0, new Rotation2d(-Math.PI / 4)),
+                new SwerveModuleState(0, new Rotation2d(Math.PI / 4))
+            };
+        }
         for (int i = 0; i < modules.length; i++) {
             states[i].optimize(modules[i].getTurnPosition());
             states[i].cosineScale(modules[i].getTurnPosition());

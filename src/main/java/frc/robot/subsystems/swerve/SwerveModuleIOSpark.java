@@ -20,17 +20,18 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
     private SparkMax turnMotor;
     private SparkMax driveMotor;
 
-    private RelativeEncoder turnEncoder;
-    private AbsoluteEncoder driveEncoder;
+    private AbsoluteEncoder turnEncoder;//
+    private RelativeEncoder driveEncoder;//
 
     public SwerveModuleIOSpark(int index) {
         turnMotor = new SparkMax(SwerveConstants.turnCANIds[index], MotorType.kBrushless);
         driveMotor = new SparkMax(SwerveConstants.driveCANIds[index], MotorType.kBrushless);
 
-        turnEncoder = turnMotor.getEncoder();
-        driveEncoder = driveMotor.getAbsoluteEncoder();
+        turnEncoder = turnMotor.getAbsoluteEncoder();//
+        driveEncoder = driveMotor.getEncoder();//
 
         turnMotor.configure(SwerveConstants.turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        driveMotor.configure(SwerveConstants.driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void setTurnPosition(Rotation2d angle) {
@@ -40,14 +41,6 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
     public void setDriveVelocity(double speedMetersPerSecond) {
         driveMotor.getClosedLoopController().setReference(speedMetersPerSecond, ControlType.kVelocity);
     }
-
-    // public SwerveModuleState optimizeState(SwerveModuleState defaultState) {
-    //     double angle = defaultState.angle.getRadians();
-    //     double speed = defaultState.speedMetersPerSecond;
-    //     turnMotor.getAbsoluteEncoder().getPosition();
-
-
-    // }
 
    @Override
     public void updateInputs(SwerveModuleIOInputs inputs) {

@@ -16,5 +16,9 @@ public class Constants {
         public static final double robotSizeMeters = Units.inchesToMeters(18);
 
         public static final double maxVelocityMetersPerSec = 5;
+
+        static {
+            
+        }
     }
 }
