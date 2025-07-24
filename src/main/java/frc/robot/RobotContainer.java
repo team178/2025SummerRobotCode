@@ -10,7 +10,8 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.subsystems.swerve.SwerveDrive;
 
 public class RobotContainer {
-    private CommandXboxController driverController = new CommandXboxController(0);
+    private CommandXboxController masterController = new CommandXboxController(0);
+    // private CommandXboxController driverController = new CommandXboxController(0);
     // private CommandXboxController auxController = new CommandXboxController(0);
 
     // subsystems
@@ -24,9 +25,12 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerve.setDefaultCommand(swerve.runControllerInputs(
-            driverController::getLeftX,
-            driverController::getLeftY,
-            driverController::getRightX
+            // driverController::getLeftX,
+            // driverController::getLeftY,
+            // driverController::getRightX,
+            masterController::getLeftX,
+            masterController::getLeftY,
+            masterController::getRightX
         ));
     }
 

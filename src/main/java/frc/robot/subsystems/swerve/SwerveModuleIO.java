@@ -9,6 +9,7 @@ public interface SwerveModuleIO {
     public static class SwerveModuleIOInputs {
         public Rotation2d turnPosition = new Rotation2d();
         public double speedMetersPerSecond = 0;
+        public double drivePositionMeters = 0;
     }
 
     // update the inputs

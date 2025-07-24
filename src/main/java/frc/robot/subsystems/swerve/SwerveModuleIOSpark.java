@@ -20,15 +20,15 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
     private SparkMax turnMotor;
     private SparkMax driveMotor;
 
-    private AbsoluteEncoder turnEncoder;//
-    private RelativeEncoder driveEncoder;//
+    private AbsoluteEncoder turnEncoder;
+    private RelativeEncoder driveEncoder;
 
     public SwerveModuleIOSpark(int index) {
         turnMotor = new SparkMax(SwerveConstants.turnCANIds[index], MotorType.kBrushless);
         driveMotor = new SparkMax(SwerveConstants.driveCANIds[index], MotorType.kBrushless);
 
-        turnEncoder = turnMotor.getAbsoluteEncoder();//
-        driveEncoder = driveMotor.getEncoder();//
+        turnEncoder = turnMotor.getAbsoluteEncoder();
+        driveEncoder = driveMotor.getEncoder();
 
         turnMotor.configure(SwerveConstants.turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
         driveMotor.configure(SwerveConstants.driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
@@ -39,12 +39,16 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
     }
 
     public void setDriveVelocity(double speedMetersPerSecond) {
-        driveMotor.getClosedLoopController().setReference(speedMetersPerSecond, ControlType.kVelocity);
+        double wheelRPM = speedMetersPerSecond * 60 / SwerveConstants.wheelCircumference;
+        double motorRPM = wheelRPM * SwerveConstants.gearRatio; //how many motor rotations for each wheel rotation
+
+        driveMotor.getClosedLoopController().setReference(motorRPM, ControlType.kVelocity);
     }
 
    @Override
     public void updateInputs(SwerveModuleIOInputs inputs) {
         inputs.turnPosition = Rotation2d.fromRotations(turnEncoder.getPosition());
         inputs.speedMetersPerSecond = driveEncoder.getVelocity();
+        inputs.drivePositionMeters = driveEncoder.getPosition();
     }
 }
