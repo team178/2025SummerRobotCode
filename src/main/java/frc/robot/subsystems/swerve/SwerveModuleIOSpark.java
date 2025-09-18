@@ -38,11 +38,8 @@ public class SwerveModuleIOSpark implements SwerveModuleIO {
         turnMotor.getClosedLoopController().setReference(angle.getRotations(), ControlType.kPosition);
     }
 
-    public void setDriveVelocity(double speedMetersPerSecond) {
-        double wheelRPM = speedMetersPerSecond * 60 / SwerveConstants.wheelCircumference;
-        double motorRPM = wheelRPM * SwerveConstants.gearRatio; //how many motor rotations for each wheel rotation
-
-        driveMotor.getClosedLoopController().setReference(motorRPM, ControlType.kVelocity);
+    public void setDriveVelocity(double revolutionsPerMinute) {
+        driveMotor.getClosedLoopController().setReference(revolutionsPerMinute, ControlType.kVelocity);
     }
 
    @Override

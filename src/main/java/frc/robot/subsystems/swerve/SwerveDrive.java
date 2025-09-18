@@ -23,7 +23,7 @@ public class SwerveDrive extends SubsystemBase {
     private SwerveModulePosition[] modulePositions;
     
     private SwerveDriveKinematics kinematics;
-    private SwerveDrivePoseEstimator poseEstimator;
+    // private SwerveDrivePoseEstimator poseEstimator;
 
     private Gyro gyro;
 
@@ -42,7 +42,9 @@ public class SwerveDrive extends SubsystemBase {
             new Translation2d(-SwerveConstants.robotSizeMeters / 2, -SwerveConstants.robotSizeMeters / 2)
         );
 
-        poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getYawHeading(), modulePositions, new Pose2d());
+        gyro = new Gyro(new GyroIOPigeon());
+
+        // poseEstimator = new SwerveDrivePoseEstimator(kinematics, gyro.getYawHeading(), modulePositions, new Pose2d());
     }
 
     public Command runControllerInputs(
@@ -147,6 +149,6 @@ public class SwerveDrive extends SubsystemBase {
             modulePositions[i] = modules[i].getPosition();
         }
 
-        poseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyro.getYawHeading(), modulePositions);
+        // poseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyro.getYawHeading(), modulePositions);
     }
 }

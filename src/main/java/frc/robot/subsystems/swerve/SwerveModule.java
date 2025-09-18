@@ -6,6 +6,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.SwerveConstants;
 
 public class SwerveModule {
     private SwerveModuleIOInputsAutoLogged inputs;
@@ -23,7 +24,11 @@ public class SwerveModule {
     }
 
     public void setModuleState(SwerveModuleState state, boolean atRest) {
-        io.setDriveVelocity(state.speedMetersPerSecond);
+        double speedMetersPerMinute = state.speedMetersPerSecond * 60;
+        double wheelRPM = speedMetersPerMinute / SwerveConstants.wheelCircumference;
+        double motorRPM = wheelRPM * SwerveConstants.gearRatio; //how many motor rotations for each wheel rotation
+
+        io.setDriveVelocity(motorRPM);
         Logger.recordOutput("Module" + index + "/State", state);
     }
 

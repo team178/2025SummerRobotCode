@@ -12,12 +12,15 @@ public interface SwerveModuleIO {
         public double drivePositionMeters = 0;
     }
 
-    // update the inputs
+    /** Update and push the inputs from the module to the higher level code */
     public void updateInputs(SwerveModuleIOInputs inputs);
 
-    // set turn position
+    /** Set the turn position of the module */
     public void setTurnPosition(Rotation2d angle);
 
-    // set drive velocity
-    public void setDriveVelocity(double speedMetersPerSecond);
+    /** Set the drive velocity
+     * 
+     * @param revolutionsPerMinute Speed in meters per second
+     */
+    public void setDriveVelocity(double revolutionsPerMinute);
 }

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
 
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -25,7 +26,7 @@ public class Constants {
         public static final double robotSizeMeters = Units.inchesToMeters(18);
         public static final double wheelDiameter = 3; // meters
         public static final double wheelCircumference = wheelDiameter * Math.PI; // meters
-        public static final double gearRatio = 2;
+        public static final double gearRatio = 4.71;
 
         public static final double maxVelocityMetersPerSec = 5;
         
@@ -39,6 +40,17 @@ public class Constants {
                 .inverted(false);
             turnMotorConfig.closedLoop
                 .positionWrappingInputRange(0, 1)
+                .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+                .pid(0, 0, 0);
+
+            driveMotorConfig
+                .smartCurrentLimit(30)
+                .voltageCompensation(12)
+                .inverted(false);
+            driveMotorConfig.absoluteEncoder
+                .inverted(false);
+            driveMotorConfig.closedLoop
+                .outputRange(-1, 1)
                 .pid(0, 0, 0);
         }
     }
