@@ -8,8 +8,10 @@ public interface SwerveModuleIO {
     @AutoLog
     public static class SwerveModuleIOInputs {
         public Rotation2d turnPosition = new Rotation2d();
-        public double speedMetersPerSecond = 0;
-        public double drivePositionMeters = 0;
+        public double turnVelocityRadPerSec = 0;
+        
+        public double drivePositionRad = 0;
+        public double driveVelocityRadPerSec = 0;
     }
 
     /** Update and push the inputs from the module to the higher level code */
@@ -20,7 +22,7 @@ public interface SwerveModuleIO {
 
     /** Set the drive velocity
      * 
-     * @param revolutionsPerMinute Speed in meters per second
+     * @param velocityRadPerSec Velocity in Radians per Second
      */
-    public void setDriveVelocity(double revolutionsPerMinute);
+    public void setDriveVelocity(double velocityRadPerSec);
 }

@@ -5,6 +5,9 @@ import static edu.wpi.first.units.Units.Rotation;
 import java.util.Arrays;
 import java.util.function.DoubleSupplier;
 
+import org.littletonrobotics.junction.LoggedRobot;
+import org.littletonrobotics.junction.Logger;
+
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -34,12 +37,21 @@ public class SwerveDrive extends SubsystemBase {
             new SwerveModule(new SwerveModuleIOSpark(2), 2),
             new SwerveModule(new SwerveModuleIOSpark(3), 3)
         };
-        modulePositions = new SwerveModulePosition[4];
+        modulePositions = new SwerveModulePosition[] {
+            new SwerveModulePosition(0, new Rotation2d()),
+            new SwerveModulePosition(0, new Rotation2d()),
+            new SwerveModulePosition(0, new Rotation2d()),
+            new SwerveModulePosition(0, new Rotation2d())
+        };
+
+        double halfWheelDistance = SwerveConstants.wheelDistanceMeters / 2;
+        double wheelRadius = SwerveConstants.wheelRadiusMeters;
+
         kinematics = new SwerveDriveKinematics(
-            new Translation2d(SwerveConstants.robotSizeMeters / 2, SwerveConstants.robotSizeMeters / 2),
-            new Translation2d(SwerveConstants.robotSizeMeters / 2, -SwerveConstants.robotSizeMeters / 2),
-            new Translation2d(-SwerveConstants.robotSizeMeters / 2, SwerveConstants.robotSizeMeters / 2),
-            new Translation2d(-SwerveConstants.robotSizeMeters / 2, -SwerveConstants.robotSizeMeters / 2)
+            new Translation2d(halfWheelDistance - wheelRadius, halfWheelDistance - wheelRadius),
+            new Translation2d(halfWheelDistance - wheelRadius, -halfWheelDistance + wheelRadius),
+            new Translation2d(-halfWheelDistance + wheelRadius, halfWheelDistance - wheelRadius),
+            new Translation2d(-halfWheelDistance + wheelRadius, -halfWheelDistance + wheelRadius)
         );
 
         gyro = new Gyro(new GyroIOPigeon());
@@ -75,7 +87,7 @@ public class SwerveDrive extends SubsystemBase {
 
             omega = adjustAxisInput(omega, deadband);
 
-            double magnitude = adjustAxisInput(Math.hypot(vx, vy), deadband) * SwerveConstants.maxVelocityMetersPerSec;
+            double magnitude = adjustAxisInput(Math.hypot(vx, vy), deadband) * SwerveConstants.maxWheelSpeedMetersPerSec;
             double angle = Math.atan2(vy, vx);
             applyDriveInputs(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude, omega, false);
         });
@@ -101,7 +113,7 @@ public class SwerveDrive extends SubsystemBase {
 
             omega = adjustAxisInput(omega, deadband);
 
-            double magnitude = adjustAxisInput(Math.hypot(vx, vy), deadband) * SwerveConstants.maxVelocityMetersPerSec;
+            double magnitude = adjustAxisInput(Math.hypot(vx, vy), deadband) * SwerveConstants.maxChassisSpeedMagnitudeMetersPerSec;
             double angle = Math.atan2(vy, vx);
             applyDriveInputs(Math.cos(angle) * magnitude, Math.sin(angle) * magnitude, omega, false);
         });
@@ -129,8 +141,14 @@ public class SwerveDrive extends SubsystemBase {
             } else {
                 speeds = ChassisSpeeds.fromFieldRelativeSpeeds(vx, vy, omega, gyro.getYawHeading());
             }
+            speeds = ChassisSpeeds.discretize(speeds, LoggedRobot.defaultPeriodSecs); // make the speeds realistic for a time period
             states = kinematics.toSwerveModuleStates(speeds);
+            SwerveDriveKinematics.desaturateWheelSpeeds(states, SwerveConstants.maxChassisSpeedMagnitudeMetersPerSec);
+
+            Logger.recordOutput("Drive/ChassisSpeeds/Setpoints", speeds);
         }
+
+        Logger.recordOutput("Drive/States/Setpoints", states);
 
         for (int i = 0; i < modules.length; i++) {
             states[i].optimize(modules[i].getTurnPosition());
@@ -142,12 +160,20 @@ public class SwerveDrive extends SubsystemBase {
 
     @Override
     public void periodic() {
+        /* Call Interface Periodics */
         gyro.periodic();
         Arrays.stream(modules).forEach(module -> module.periodic());
 
+        SwerveModuleState[] states = new SwerveModuleState[4];
+
         for (int i = 0; i < modules.length; i++) {
             modulePositions[i] = modules[i].getPosition();
+
+            states[i] = modules[i].getCurrentState();
         }
+
+        Logger.recordOutput("Drive/ActualStates", states);
+
 
         // poseEstimator.updateWithTime(Timer.getFPGATimestamp(), gyro.getYawHeading(), modulePositions);
     }
